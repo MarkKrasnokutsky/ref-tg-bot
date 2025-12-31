@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  ref-application-db:
+    image: postgres:15
+    container_name: ref-db
+    user: root
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'ref_db'
+    healthcheck:
+      test: pg_isready -U $$POSTGRESQL_USERNAME
+    ports:
+      - '28071:5432'
+    volumes:
+      - ./.volumes/sc-db/pgdata:/var/lib/postgresql/data

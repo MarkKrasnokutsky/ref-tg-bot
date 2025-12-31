@@ -1,5 +1,6 @@
 package com.ref.application.config;
 
+import com.ref.application.service.UpdateDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
@@ -10,18 +11,20 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 public class Bot extends TelegramWebhookBot {
 
+    private final UpdateDispatcher updateDispatcher;
 
     private final TelegramProps telegramProps;
 
-    public Bot(TelegramProps telegramProps) {
+    public Bot(TelegramProps telegramProps, UpdateDispatcher updateDispatcher) {
         super(telegramProps.getToken());
         this.telegramProps = telegramProps;
+        this.updateDispatcher = updateDispatcher;
     }
 
     // Реализация метода стандартного поведения бота на любой отправленный объект на сервер
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        return null;
+        return updateDispatcher.distribute(update, this);
     }
 
     // Получение url бота
