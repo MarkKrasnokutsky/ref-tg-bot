@@ -26,7 +26,7 @@ public class StartManager {
     private final UserRepository userRepository;
 
     public SendMessage answerCommand(Message message) {
-
+        // сохраняем пользователя в нашу БД
         UserEntity currentUser = UserEntity.builder()
                 .userId(message.getFrom().getId())
                 .chatId(message.getChatId())
@@ -36,6 +36,7 @@ public class StartManager {
                 .build();
         userRepository.save(currentUser);
 
+        // отдаем пользователю сообщение от бота
         return answerMethodFactory.getSendMessage(
                 message.getChatId(),
                 """

@@ -1,6 +1,8 @@
 package com.ref.application.service.handler;
 
 import com.ref.application.config.Bot;
+import com.ref.application.domain.enumeration.ECallbackData;
+import com.ref.application.service.manager.InfoManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -10,7 +12,21 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 @RequiredArgsConstructor
 public class CallbackQueryHandler {
 
+    private final InfoManager infoManager;
+
     public BotApiMethod<?> answer(CallbackQuery callbackQuery, Bot bot) {
+        // получаем тип callback query
+        ECallbackData callbackData = ECallbackData.fromString(callbackQuery.getData());
+
+        if (callbackData == null) {
+            throw new RuntimeException();
+        }
+
+        switch (callbackData) {
+            case INFO -> {
+                return infoManager.answerCallbackQuery(callbackQuery);
+            }
+        }
         return null;
     }
 

@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 @Component
 public class AnswerMethodFactory {
 
+    // реализация метода для отправки сообщения от бота
     public SendMessage getSendMessage(Long chatId, String text, ReplyKeyboard keyboard) {
         return SendMessage.builder()
                 .chatId(chatId)

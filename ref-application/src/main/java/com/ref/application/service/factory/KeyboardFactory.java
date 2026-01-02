@@ -13,6 +13,7 @@ import java.util.List;
 @Component
 public class KeyboardFactory {
 
+    // инициализация inline-клавиатуры
     public InlineKeyboardMarkup getInlineKeyboardMarkup(List<String> text, List<Integer> config, List<String> data) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         int index = 0;
