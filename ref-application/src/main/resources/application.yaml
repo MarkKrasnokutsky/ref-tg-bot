@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: ref-application
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: admin
+    password: admin
+    url: jdbc:postgresql://localhost:28071/ref_db
+  liquibase:
+    changeLog: classpath:/db/db.changelog-master.xml
+    databaseChangeLogTable: _databasechangelog
+    databaseChangeLogLockTable: _databasechangeloglock
+server:
+  port: 8090
+
+# Регистрация сервиса в дискавери
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:1000/eureka/
+
+
+# Параметры подключения бота
+telegram-bot:
+  username: "@ref_test_java_bot"
+  token: "8067451738:AAHGcEZ-eOzrEjcBRYHIlnzPHkBDIV0Pjz4"
+  path: "https://sagaciously-diverse-duckbill.cloudpub.ru/"
