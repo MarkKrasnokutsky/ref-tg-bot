@@ -1,5 +1,7 @@
 package com.ref.application.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "\"user\"", indexes = {
@@ -39,6 +43,18 @@ public class UserEntity {
     @CreationTimestamp
     @Column(name = "registered_at", nullable = false, updatable = false)
     private Instant registeredAt = Instant.now();
+
+    // Связь "многие к одному" - этот пользователь может иметь родителя
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_user_id", foreignKey = @ForeignKey(name = "fk_user_parent_user"))
+    @JsonBackReference // предотвращает рекурсию при сериализации JSON
+    private UserEntity parent;
+
+    // Связь "один ко многим" - этот пользователь может быть родителем для других пользователей
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    @JsonManagedReference // обратная сторона @JsonBackReference
+    private List<UserEntity> children = new ArrayList<>();
 
 }
 

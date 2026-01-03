@@ -25,6 +25,12 @@
             <column name="registered_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="ref_user_id" type="BIGINT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_ref_user_id"
+                             referencedTableName="user"
+                             referencedColumnNames="user_id"/>
+            </column>
         </createTable>
 
         <createIndex indexName="idx_user_chat_id"
@@ -36,6 +42,10 @@
                      tableName="user"
                      unique="true">
             <column name="user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_ref_user_id"
+                     tableName="user">
+        <column name="ref_user_id"/>
         </createIndex>
     </changeSet>
 
