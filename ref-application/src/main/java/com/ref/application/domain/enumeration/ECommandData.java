@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum ECommandData {
 
     START("/start"),
-    INFO("/info");
+    INFO("/info"),
+    INVITE("/invite");
 
     private final String command;
 

@@ -25,11 +25,17 @@
             <column name="registered_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="indv_ref_code" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
             <column name="ref_user_id" type="BIGINT">
                 <constraints nullable="true"
                              foreignKeyName="fk_ref_user_id"
                              referencedTableName="user"
                              referencedColumnNames="user_id"/>
+            </column>
+            <column name="friend_ref_code" type="VARCHAR(255)">
+                <constraints nullable="true"/>
             </column>
         </createTable>
 

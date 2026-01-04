@@ -3,6 +3,7 @@ package com.ref.application.service.handler;
 import com.ref.application.config.Bot;
 import com.ref.application.domain.enumeration.ECommandData;
 import com.ref.application.service.manager.InfoManager;
+import com.ref.application.service.manager.InviteManager;
 import com.ref.application.service.manager.StartManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,8 @@ public class CommandHandler {
     private final StartManager startManager;
     @Autowired
     private final InfoManager infoManager;
+    @Autowired
+    private InviteManager inviteManager;
 
     // обработка команды
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -36,6 +40,13 @@ public class CommandHandler {
             }
             case INFO -> {
                 return info(message);
+            }
+            case INVITE -> {
+                try {
+                    return invite(message, bot);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
             default -> {
                 return defaultAnswer(message);
@@ -61,6 +72,10 @@ public class CommandHandler {
     private BotApiMethod<?> info(Message message) {
         // передача ответственности manager'у данной команды
         return infoManager.answerCommand(message);
+    }
+
+    private BotApiMethod<?> invite(Message message, Bot bot) throws TelegramApiException {
+        return inviteManager.answerCommand(message, bot);
     }
 
 }

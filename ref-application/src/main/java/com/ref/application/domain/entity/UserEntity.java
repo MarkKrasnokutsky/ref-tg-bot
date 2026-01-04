@@ -44,6 +44,12 @@ public class UserEntity {
     @Column(name = "registered_at", nullable = false, updatable = false)
     private Instant registeredAt = Instant.now();
 
+    @Column(name = "indv_ref_code", nullable = false, unique = true, updatable = false)
+    private String indvRefCode;
+
+    @Column(name = "friend_ref_code")
+    private String friendRefCode;
+
     // Связь "многие к одному" - этот пользователь может иметь родителя
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_user_id", foreignKey = @ForeignKey(name = "fk_user_parent_user"))
