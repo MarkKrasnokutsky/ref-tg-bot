@@ -35,6 +35,7 @@ public class StartManager {
                 .firstName(message.getFrom().getFirstName())
                 .lastName(message.getFrom().getLastName())
                 .indvRefCode(UUID.randomUUID().toString())
+                .balance(100)
                 .build();
         userRepository.save(currentUser);
 

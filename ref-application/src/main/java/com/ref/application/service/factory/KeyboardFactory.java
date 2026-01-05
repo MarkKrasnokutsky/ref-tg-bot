@@ -51,5 +51,9 @@ public class KeyboardFactory {
         return replyKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup createYesNoKeyboard() {
+
+    }
+
 }
 

@@ -37,6 +37,12 @@
             <column name="friend_ref_code" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
+            <column name="balance" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_referrals" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <createIndex indexName="idx_user_chat_id"

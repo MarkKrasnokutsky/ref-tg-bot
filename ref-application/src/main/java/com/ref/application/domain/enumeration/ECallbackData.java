@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ECallbackData {
+    YES("yes"),
+    NO("no"),
     INFO("info"),
     INVITE("invite");
 
