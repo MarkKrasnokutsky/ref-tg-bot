@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ref.application.domain.enumeration.EUserState;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.validation.constraints.Min;
@@ -22,6 +19,11 @@ import java.util.List;
 })
 @Data
 @Builder
+@NamedEntityGraph(
+        name = "UserEntity.withParent",
+        attributeNodes = @NamedAttributeNode("parent")
+)
+@ToString(exclude = {"parent", "children"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {

@@ -27,17 +27,19 @@ public class StartManager {
     private final UserRepository userRepository;
 
     public SendMessage answerCommand(Message message) {
-        // сохраняем пользователя в нашу БД
-        UserEntity currentUser = UserEntity.builder()
-                .userId(message.getFrom().getId())
-                .chatId(message.getChatId())
-                .username(message.getFrom().getFirstName())
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .indvRefCode(UUID.randomUUID().toString())
-                .balance(100)
-                .build();
-        userRepository.save(currentUser);
+        if (!userRepository.existsByChatId(message.getChatId())) {
+            // сохраняем пользователя в нашу БД
+            UserEntity currentUser = UserEntity.builder()
+                    .userId(message.getFrom().getId())
+                    .chatId(message.getChatId())
+                    .username(message.getFrom().getFirstName())
+                    .firstName(message.getFrom().getFirstName())
+                    .lastName(message.getFrom().getLastName())
+                    .indvRefCode(UUID.randomUUID().toString())
+                    .balance(100)
+                    .build();
+            userRepository.save(currentUser);
+        }
 
         // отдаем пользователю сообщение от бота
         return answerMethodFactory.getSendMessage(
@@ -46,9 +48,9 @@ public class StartManager {
                         🖖Приветствую, это бот реферальной системы Trinity
                         """,
                 keyboardFactory.getInlineKeyboardMarkup(
-                        List.of("Информация", "\uD83E\uDD1D\uD83C\uDFFBПригласить друга"),
-                        List.of(1, 1),
-                        List.of(ECallbackData.INFO.toString(), ECallbackData.INVITE.toString())
+                        List.of("Информация", "\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
+                        List.of(2, 1),
+                        List.of(ECallbackData.INFO.toString(), ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
                 )
         );
     }

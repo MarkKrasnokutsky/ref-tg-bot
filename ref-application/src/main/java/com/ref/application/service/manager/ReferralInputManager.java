@@ -27,7 +27,7 @@ public class ReferralInputManager {
     private final BonusService bonusService;
 
     public SendMessage askIfHasReferralCode(Message message, Bot bot) throws TelegramApiException {
-        Long userId = message.getFrom().getId();
+        Long userId = message.getChatId();
 
         // Устанавливаем состояние в БД
         userStateService.setUserState(userId, EUserState.AWAITING_REFERRAL_RESPONSE);
@@ -43,7 +43,7 @@ public class ReferralInputManager {
     }
 
     public SendMessage handleYesResponse(Message message, Bot bot) throws TelegramApiException {
-        Long userId = message.getFrom().getId();
+        Long userId = message.getChatId();
 
         // Проверяем, что пользователь действительно в этом состоянии
         if (!userStateService.hasState(userId, EUserState.AWAITING_REFERRAL_RESPONSE)) {
@@ -93,6 +93,19 @@ public class ReferralInputManager {
 
         // Ищем пользователя по реферальному коду
         Optional<UserEntity> referrerOpt = userRepository.findByIndvRefCode(referralCode);
+        UserEntity referrer = referrerOpt.get();
+        UserEntity currentUser = userRepository.findByUserId(userId);
+
+        // Проверяем, не использовал ли уже пользователь реферальный код
+        if (currentUser.getParent() != null) {
+            SendMessage alreadyUsedMessage = answerMethodFactory.getSendMessage(
+                    message.getChatId(),
+                    "❌ Вы уже использовали реферальный код ранее.",
+                    null
+            );
+            bot.execute(alreadyUsedMessage);
+            return alreadyUsedMessage;
+        }
 
         if (referrerOpt.isEmpty()) {
             SendMessage errorMessage = answerMethodFactory.getSendMessage(
@@ -106,9 +119,6 @@ public class ReferralInputManager {
             return askForReferralCodeAgain(message, bot);
         }
 
-        UserEntity referrer = referrerOpt.get();
-        UserEntity currentUser = userRepository.findByUserId(userId);
-
         // Проверяем, не пытается ли пользователь использовать свой собственный код
         if (referrer.getUserId().equals(userId)) {
             SendMessage selfReferralMessage = answerMethodFactory.getSendMessage(
@@ -120,19 +130,9 @@ public class ReferralInputManager {
             return selfReferralMessage;
         }
 
-        // Проверяем, не использовал ли уже пользователь реферальный код
-        if (currentUser.getParent() != null) {
-            SendMessage alreadyUsedMessage = answerMethodFactory.getSendMessage(
-                    message.getChatId(),
-                    "❌ Вы уже использовали реферальный код ранее.",
-                    null
-            );
-            bot.execute(alreadyUsedMessage);
-            return alreadyUsedMessage;
-        }
-
         // Сохраняем реферера для пользователя
         currentUser.setParent(referrer);
+        currentUser.setFriendRefCode(referralCode);
         userRepository.save(currentUser);
 
         // Начисляем бонусы

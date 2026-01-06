@@ -9,7 +9,8 @@ public enum ECallbackData {
     YES("yes"),
     NO("no"),
     INFO("info"),
-    INVITE("invite");
+    INVITE("invite"),
+    TAKE_BONUS("take_bonus");
 
     private final String callback;
 

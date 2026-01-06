@@ -9,7 +9,8 @@ public enum ECommandData {
 
     START("/start"),
     INFO("/info"),
-    INVITE("/invite");
+    INVITE("/invite"),
+    TAKE_BONUS("/take_bonus");
 
     private final String command;
 

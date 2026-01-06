@@ -1,5 +1,6 @@
 package com.ref.application.service.factory;
 
+import com.ref.application.domain.enumeration.ECallbackData;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -52,7 +53,11 @@ public class KeyboardFactory {
     }
 
     public InlineKeyboardMarkup createYesNoKeyboard() {
-
+        return getInlineKeyboardMarkup(
+                List.of("Да", "Нет"),
+                List.of(1, 1),
+                List.of(ECallbackData.YES.toString(), ECallbackData.NO.toString())
+        );
     }
 
 }

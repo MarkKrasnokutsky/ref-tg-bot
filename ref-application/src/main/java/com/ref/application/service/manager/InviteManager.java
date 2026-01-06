@@ -2,6 +2,7 @@ package com.ref.application.service.manager;
 
 import com.ref.application.config.Bot;
 import com.ref.application.domain.entity.UserEntity;
+import com.ref.application.domain.enumeration.ECallbackData;
 import com.ref.application.repository.UserRepository;
 import com.ref.application.service.factory.AnswerMethodFactory;
 import com.ref.application.service.factory.KeyboardFactory;
@@ -14,6 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -47,7 +50,7 @@ public class InviteManager {
     }
 
     public EditMessageText answerCallbackQuery(CallbackQuery callbackQuery, Bot bot) throws TelegramApiException {
-        UserEntity user = userRepository.findByUserId(callbackQuery.getMessage().getFrom().getId());
+        UserEntity user = userRepository.findByChatId(callbackQuery.getMessage().getChatId());
         // отдаем пользователю сообщение от бота
 
         SendMessage sendMessage = answerMethodFactory.getSendMessage(
@@ -55,9 +58,13 @@ public class InviteManager {
                 """
                         Ниже отправляем код, который можно переслать другу для регистрации
                         Кстати, напоминаем! Мы подарим 200 бонусов Вам за каждого приглашённого друга и 200 приветственных бонусов Вашему другу сразу после регистрации🙌🏻✨
-                        ```%s```
+                        `%s`
                         """.formatted(user.getIndvRefCode()),
-                null
+                keyboardFactory.getInlineKeyboardMarkup(
+                        List.of("Информация", "Получить бонус"),
+                        List.of(1, 1),
+                        List.of(ECallbackData.INFO.toString(), ECallbackData.TAKE_BONUS.toString())
+                )
         );
         sendMessage.setParseMode("Markdown");
         bot.execute(sendMessage);
