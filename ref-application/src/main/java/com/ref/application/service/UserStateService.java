@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+// Сервис по управлению состояния пользователя бота
 public class UserStateService {
 
     private final UserRepository userRepository;

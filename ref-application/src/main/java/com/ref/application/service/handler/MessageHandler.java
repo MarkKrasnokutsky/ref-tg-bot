@@ -20,6 +20,7 @@ public class MessageHandler {
 
     public BotApiMethod<?> answer(Message message, Bot bot) {
 
+        // Отслеживаем состояние ожидания реферального кода от пользователя и передаем ответственность менеджеру обработки кода
         if (userStateService.hasState(message.getFrom().getId(), EUserState.AWAITING_REFERRAL_CODE)) {
             try {
                 referralInputManager.handleReferralCodeInput(message, bot);
