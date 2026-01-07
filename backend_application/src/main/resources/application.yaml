@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: backend-application
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: admin
+    password: admin
+    url: jdbc:postgresql://localhost:28072/backend_db
+  liquibase:
+    changeLog: classpath:/db/db.changelog-master.xml
+    databaseChangeLogTable: _databasechangelog
+    databaseChangeLogLockTable: _databasechangeloglock
+server:
+  port: 8070
+
+# ??????????? ??????? ? ?????????
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:1000/eureka/

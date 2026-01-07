@@ -7,7 +7,6 @@
         <groupId>com.mark</groupId>
         <artifactId>ref-tg-bot</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>ref-application</artifactId>
@@ -48,6 +47,7 @@
 <!--                </exclusion>-->
 <!--            </exclusions>-->
         </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
