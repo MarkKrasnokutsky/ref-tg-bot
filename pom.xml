@@ -33,6 +33,7 @@
     <modules>
         <module>discovery-server</module>
         <module>ref-application</module>
+        <module>backend_application</module>
     </modules>
     <scm>
 		<connection/>
