@@ -10,6 +10,9 @@
             <column name="user_id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
+            <column name="state" type="VARCHAR">
+                <constraints nullable="true"/>
+            </column>
             <column name="chat_id" type="BIGINT">
                 <constraints nullable="false" unique="true"/>
             </column>
@@ -25,6 +28,24 @@
             <column name="registered_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="indv_ref_code" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="ref_user_id" type="BIGINT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_ref_user_id"
+                             referencedTableName="user"
+                             referencedColumnNames="user_id"/>
+            </column>
+            <column name="friend_ref_code" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="balance" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_referrals" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <createIndex indexName="idx_user_chat_id"
@@ -36,6 +57,10 @@
                      tableName="user"
                      unique="true">
             <column name="user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_ref_user_id"
+                     tableName="user">
+        <column name="ref_user_id"/>
         </createIndex>
     </changeSet>
 

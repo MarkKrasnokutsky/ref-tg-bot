@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -26,15 +27,19 @@ public class StartManager {
     private final UserRepository userRepository;
 
     public SendMessage answerCommand(Message message) {
-        // сохраняем пользователя в нашу БД
-        UserEntity currentUser = UserEntity.builder()
-                .userId(message.getFrom().getId())
-                .chatId(message.getChatId())
-                .username(message.getFrom().getFirstName())
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .build();
-        userRepository.save(currentUser);
+        if (!userRepository.existsByChatId(message.getChatId())) {
+            // сохраняем пользователя в нашу БД
+            UserEntity currentUser = UserEntity.builder()
+                    .userId(message.getFrom().getId())
+                    .chatId(message.getChatId())
+                    .username(message.getFrom().getFirstName())
+                    .firstName(message.getFrom().getFirstName())
+                    .lastName(message.getFrom().getLastName())
+                    .indvRefCode(UUID.randomUUID().toString())
+                    .balance(100)
+                    .build();
+            userRepository.save(currentUser);
+        }
 
         // отдаем пользователю сообщение от бота
         return answerMethodFactory.getSendMessage(
@@ -43,9 +48,9 @@ public class StartManager {
                         🖖Приветствую, это бот реферальной системы Trinity
                         """,
                 keyboardFactory.getInlineKeyboardMarkup(
-                        List.of("Информация"),
-                        List.of(1),
-                        List.of(ECallbackData.INFO.toString())
+                        List.of("Информация", "\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
+                        List.of(2, 1),
+                        List.of(ECallbackData.INFO.toString(), ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
                 )
         );
     }

@@ -36,9 +36,9 @@ public class InfoManager {
                         and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
                         """,
                 keyboardFactory.getInlineKeyboardMarkup(
-                        List.of("Информация"),
-                        List.of(1),
-                        List.of(ECallbackData.INFO.toString())
+                        List.of("\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
+                        List.of(1, 1),
+                        List.of(ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
                 )
         );
     }
@@ -55,7 +55,11 @@ public class InfoManager {
                         It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,
                         and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
                         """,
-                null);
+                keyboardFactory.getInlineKeyboardMarkup(
+                        List.of("\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
+                        List.of(1, 1),
+                        List.of(ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
+                ));
     }
 
 }
