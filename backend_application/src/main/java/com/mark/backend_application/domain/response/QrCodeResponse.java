@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @Builder
@@ -16,6 +17,9 @@ public class QrCodeResponse {
     private Long id;
     private String fileName;
     private LocalDateTime createdAt;
-    private String downloadUrl;
+    private String redirectUrl;
+    private String viewUrl;
+    private Map<String, Object> qrContent;
+    private Long ownerId;
 
 }

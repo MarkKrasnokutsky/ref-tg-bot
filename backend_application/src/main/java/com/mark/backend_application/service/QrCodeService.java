@@ -9,6 +9,10 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.mark.backend_application.domain.QRContent;
 import com.mark.backend_application.domain.entity.QrCodeEntity;
+import com.mark.backend_application.domain.request.QrCodeRequest;
+import com.mark.backend_application.domain.response.QrCodeImageResponse;
+import com.mark.backend_application.domain.response.QrCodeResponse;
+import com.mark.backend_application.domain.response.ScanResponse;
 import com.mark.backend_application.repository.QrCodeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,71 +36,157 @@ public class QrCodeService {
     private final QrCodeRepository qrCodeRepository;
     private final ObjectMapper objectMapper;
 
+    private String baseUrl = "http://localhost:8070";
+
     /**
-     * Генерация QR-кода с URL и данными
+     * Генерация QR-кода
      */
-    public QrCodeEntity generateQRCode(Map<String, Object> requestData) throws Exception {
+    public QrCodeResponse generateQRCode(QrCodeRequest request) {
+        try {
 
-        // Извлекаем URL для редиректа
-        String redirectUrl = null;
+            // Создаем структурированный объект для QR-кода
+            QRContent qrContent = QRContent.builder()
+                    .url(baseUrl + "/" + request.getUserId() + "/" + request.getBalance())
+                    .data(request.getData())
+                    .metadata(Map.of(
+                            "generatedAt", Instant.now().toString(),
+                            "type", "redirect_with_data"
+                    ))
+                    .build();
 
-        if (requestData.containsKey("redirect_url")) {
-            redirectUrl = requestData.get("redirect_url").toString();
+            // Преобразуем в JSON
+            String jsonContent = objectMapper.writeValueAsString(qrContent);
+
+            // Генерируем QR-код
+            byte[] qrImage = generateQRCodeImage(jsonContent, 300, 300);
+
+            // Сохраняем в базу
+            String fileName = "qr_" + request.getUserId() + "_" + Instant.now() + ".png";
+
+            QrCodeEntity qrCode = QrCodeEntity.builder()
+                    .dataJson(jsonContent)
+                    .qrImage(qrImage)
+                    .fileName(fileName)
+                    .redirectUrl(baseUrl + "/" + request.getUserId() + "/" + 100)
+                    .ownerId(request.getUserId())
+                    .build();
+
+            QrCodeEntity saved = qrCodeRepository.save(qrCode);
+
+            // Создаем ответ
+            return QrCodeResponse.builder()
+                    .id(saved.getId())
+                    .fileName(saved.getFileName())
+                    .createdAt(saved.getCreatedAt())
+                    .redirectUrl(saved.getRedirectUrl())
+                    .ownerId(saved.getOwnerId())
+                    .qrContent(objectMapper.readValue(saved.getDataJson(), Map.class))
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error generating QR code", e);
+            throw new RuntimeException("Failed to generate QR code: " + e.getMessage(), e);
         }
-
-        Long ownerId = null;
-
-        if (requestData.containsKey("owner_id")) {
-            ownerId = Long.parseLong(requestData.get("owner_id").toString());
-        }
-
-        // Создаем структурированный объект для QR-кода
-        QRContent qrContent = QRContent.builder()
-                .url(redirectUrl)
-                .data(requestData)
-                .metadata(Map.of(
-                        "generatedAt", Instant.now().toString(),
-                        "type", "redirect_with_data"
-                ))
-                .build();
-
-        // Преобразуем в JSON
-        String jsonContent = objectMapper.writeValueAsString(qrContent);
-
-        // Генерируем QR-код
-        byte[] qrImage = generateQRCodeImage(jsonContent, 300, 300);
-
-        // Сохраняем в базу
-        String fileName = "qr_" + ownerId + "_" + Instant.now().toEpochMilli() + ".png";
-
-        QrCodeEntity qrCode = new QrCodeEntity();
-        qrCode.setDataJson(jsonContent);
-        qrCode.setQrImage(qrImage);
-        qrCode.setFileName(fileName);
-        qrCode.setRedirectUrl(redirectUrl);
-        qrCode.setOwnerId(ownerId);
-
-
-        return qrCodeRepository.save(qrCode);
     }
 
     /**
-     * Парсинг QR-кода (для мобильного приложения или обработчика)
+     * Обработка сканирования QR-кода
      */
-    public QRContent parseQRContent(String qrText) throws Exception {
+    public ScanResponse processScannedQR(String qrText) {
         try {
-            // Пытаемся распарсить как наш формат
+            QRContent qrContent = parseQRContent(qrText);
+
+            log.info("QR scanned: {}", qrContent.getUrl());
+            log.info("QR data: {}", qrContent.getData());
+
+            return ScanResponse.builder()
+                    .redirectUrl(qrContent.getUrl())
+                    .data(qrContent.getData())
+                    .metadata(qrContent.getMetadata())
+                    .shouldRedirect(true)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error processing scanned QR", e);
+            throw new RuntimeException("Failed to process QR code: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Парсинг QR-кода (только парсинг без логики)
+     */
+    public QRContent parseQRContent(String qrText) {
+        try {
             return objectMapper.readValue(qrText, QRContent.class);
         } catch (Exception e) {
-            log.warn("Не удалось распарсить как QRContent, возможно это простой URL");
+            log.warn("Failed to parse as QRContent, treating as plain URL");
 
-            // Если не наш формат, возможно это просто URL
-            QRContent content = new QRContent();
-            content.setUrl(qrText);
-            content.setData(Map.of("raw", qrText));
-            content.setMetadata(Map.of("type", "plain_url"));
+            return QRContent.builder()
+                    .url(qrText)
+                    .data(Map.of("raw", qrText))
+                    .metadata(Map.of("type", "plain_url"))
+                    .build();
+        }
+    }
 
-            return content;
+    /**
+     * Получение изображения QR-кода
+     */
+    public QrCodeImageResponse getQRCodeImageByOwnerId(Long ownerId) {
+        QrCodeEntity qrCode = getQRCodeByOwnerId(ownerId);
+
+        return QrCodeImageResponse.builder()
+                .image(qrCode.getQrImage())
+                .fileName(qrCode.getFileName())
+                .contentType(qrCode.getContentType())
+                .contentLength((long) qrCode.getQrImage().length)
+                .build();
+    }
+
+
+    /**
+     * Получение информации о QR-коде
+     */
+    public QrCodeResponse getQRCodeInfoByOwnerId(Long ownerId) {
+        QrCodeEntity qrCode = getQRCodeByOwnerId(ownerId);
+
+        try {
+            Map<String, Object> qrContent = objectMapper.readValue(qrCode.getDataJson(), Map.class);
+
+            return QrCodeResponse.builder()
+                    .id(qrCode.getId())
+                    .fileName(qrCode.getFileName())
+                    .createdAt(qrCode.getCreatedAt())
+                    .redirectUrl(qrCode.getRedirectUrl())
+                    .ownerId(qrCode.getOwnerId())
+                    .qrContent(qrContent)
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse QR content", e);
+        }
+    }
+
+    /**
+     * Получение информации о QR-коде
+     */
+    public QrCodeResponse getQRCodeInfo(Long id) {
+        QrCodeEntity qrCode = getQRCodeById(id);
+
+        try {
+            Map<String, Object> qrContent = objectMapper.readValue(qrCode.getDataJson(), Map.class);
+
+            return QrCodeResponse.builder()
+                    .id(qrCode.getId())
+                    .fileName(qrCode.getFileName())
+                    .createdAt(qrCode.getCreatedAt())
+                    .redirectUrl(qrCode.getRedirectUrl())
+                    .ownerId(qrCode.getOwnerId())
+                    .qrContent(qrContent)
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse QR content", e);
         }
     }
 
@@ -124,6 +214,14 @@ public class QrCodeService {
         ImageIO.write(bufferedImage, "png", baos);
 
         return baos.toByteArray();
+    }
+
+    /**
+     * Получение QR-кода по ownerID
+     */
+    public QrCodeEntity getQRCodeByOwnerId(Long ownerId) {
+        return qrCodeRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new RuntimeException("QR-код не найден с id пользователя: " + ownerId));
     }
 
     /**

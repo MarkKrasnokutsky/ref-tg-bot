@@ -3,7 +3,11 @@ package com.mark.backend_application.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mark.backend_application.domain.QRContent;
 import com.mark.backend_application.domain.entity.QrCodeEntity;
+import com.mark.backend_application.domain.request.QrCodeRequest;
 import com.mark.backend_application.domain.request.ScanRequest;
+import com.mark.backend_application.domain.response.QrCodeImageResponse;
+import com.mark.backend_application.domain.response.QrCodeResponse;
+import com.mark.backend_application.domain.response.ScanResponse;
 import com.mark.backend_application.service.QrCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -25,44 +30,31 @@ public class QRCodeController {
 
     private final QrCodeService qrCodeService;
 
-    private final ObjectMapper objectMapper;
-
     /**
-     * Эндпоинт для обработки сканированного QR-кода
-     * Принимает текст QR-кода, парсит его и делает редирект
+     * Обработка сканированного QR-кода
      */
     @PostMapping("/scan")
     public ResponseEntity<?> processScannedQR(@RequestBody ScanRequest request) {
         try {
-            // Парсим содержимое QR-кода
-            QRContent qrContent = qrCodeService.parseQRContent(request.getQrText());
+            ScanResponse response = qrCodeService.processScannedQR(request.getQrText());
 
-            // Логируем сканирование
-            log.info("QR scanned: {}", qrContent.getUrl());
-            log.info("QR data: {}", qrContent.getData());
+            if (response.isShouldRedirect()) {
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header(HttpHeaders.LOCATION, response.getRedirectUrl())
+                        .build();
+            } else {
+                return ResponseEntity.ok(response);
+            }
 
-            // Вариант 1: Редирект на URL
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .header(HttpHeaders.LOCATION, qrContent.getUrl())
-                    .build();
-
-            // Вариант 2: Возврат данных + URL для клиента
-            /*
-            Map<String, Object> response = new HashMap<>();
-            response.put("redirectUrl", qrContent.getUrl());
-            response.put("data", qrContent.getData());
-            response.put("metadata", qrContent.getMetadata());
-            return ResponseEntity.ok(response);
-            */
-
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            log.error("QR processing error", e);
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Неверный формат QR-кода", "message", e.getMessage()));
+                    .body(Map.of("error", "Invalid QR code format", "message", e.getMessage()));
         }
     }
 
     /**
-     * Парсинг QR-кода без редиректа (для анализа)
+     * Парсинг QR-кода без редиректа
      */
     @PostMapping("/parse")
     public ResponseEntity<QRContent> parseQR(@RequestBody ScanRequest request) {
@@ -78,71 +70,85 @@ public class QRCodeController {
      * Генерация QR-кода
      */
     @PostMapping("/generate")
-    public ResponseEntity<?> generateQRCode(@RequestBody Map<String, Object> data) {
+    public ResponseEntity<QrCodeResponse> generateQRCode(@RequestBody QrCodeRequest request) {
         try {
-            QrCodeEntity qrCode = qrCodeService.generateQRCode(data);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", qrCode.getId());
-            response.put("fileName", qrCode.getFileName());
-            response.put("downloadUrl", "/api/v1/qr/" + qrCode.getId() + "/image");
-            response.put("scanUrl", "/api/v1/qr/scan"); // Эндпоинт для сканирования
-            response.put("sampleQrContent", objectMapper.readValue(qrCode.getDataJson(), Map.class));
-
+            QrCodeResponse response = qrCodeService.generateQRCode(request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            log.error("QR generation error", e);
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+                    .body(QrCodeResponse.builder()
+                            .qrContent(Map.of("error", e.getMessage()))
+                            .build());
         }
     }
 
     /**
-     * GET запрос для получения изображения QR-кода по ID
+     * Получение изображения QR-кода по пользователю
      */
-    @GetMapping("/{id}/image")
-    public ResponseEntity<byte[]> getQRCodeImage(@PathVariable Long id) {
+    @GetMapping("/{ownerId}/image")
+    public ResponseEntity<byte[]> getQRCodeImage(@PathVariable Long ownerId) {
         try {
-            QrCodeEntity qrCode = qrCodeService.getQRCodeById(id);
+            QrCodeImageResponse imageResponse = qrCodeService.getQRCodeImageByOwnerId(ownerId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
-            headers.setContentDispositionFormData("filename", qrCode.getFileName());
-            headers.setContentLength(qrCode.getQrImage().length);
+            headers.setContentDispositionFormData("filename", imageResponse.getFileName());
+            headers.setContentLength(imageResponse.getContentLength());
 
-            return new ResponseEntity<>(qrCode.getQrImage(), headers, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return new ResponseEntity<>(imageResponse.getImage(), headers, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
     /**
-     * GET запрос для получения информации о QR-коде по ID
+     * Получение информации о QR-коде по пользователю
+     */
+    @GetMapping("/{ownerId}")
+    public ResponseEntity<QrCodeResponse> getQRCodeInfoByOwnerId(@PathVariable Long ownerId) {
+        try {
+            QrCodeResponse response = qrCodeService.getQRCodeInfoByOwnerId(ownerId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Получение информации о QR-коде
      */
     @GetMapping("/{id}")
-    public ResponseEntity<QrCodeEntity> getQRCodeInfo(@PathVariable Long id) {
+    public ResponseEntity<QrCodeResponse> getQRCodeInfo(@PathVariable Long id) {
         try {
-            QrCodeEntity qrCode = qrCodeService.getQRCodeById(id);
-            return ResponseEntity.ok(qrCode);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            QrCodeResponse response = qrCodeService.getQRCodeInfo(id);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
     /**
-     * GET запрос для получения всех QR-кодов
+     * Получение всех QR-кодов
      */
     @GetMapping
     public ResponseEntity<List<QrCodeEntity>> getAllQRCodes() {
-        List<QrCodeEntity> qrCodes = qrCodeService.getAllQRCodes();
-        return ResponseEntity.ok(qrCodes);
+        List<QrCodeEntity> responses = qrCodeService.getAllQRCodes();
+        return ResponseEntity.ok(responses);
     }
 
     /**
-     * DELETE запрос для удаления QR-кода
+     * Удаление QR-кода
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQRCode(@PathVariable Long id) {
-        qrCodeService.deleteQRCode(id);
-        return ResponseEntity.noContent().build();
+        try {
+            qrCodeService.deleteQRCode(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 }

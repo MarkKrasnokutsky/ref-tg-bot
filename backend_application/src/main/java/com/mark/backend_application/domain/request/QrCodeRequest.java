@@ -1,22 +1,18 @@
 package com.mark.backend_application.domain.request;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.util.Map;
 
+@Data
+@Builder
 public class QrCodeRequest {
+
+    private Long userId;
+    private String username;
+    private Integer balance;
 
     private Map<String, Object> data;
 
-    public QrCodeRequest() {}
-
-    public QrCodeRequest(Map<String, Object> data) {
-        this.data = data;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
 }

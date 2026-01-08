@@ -4,6 +4,7 @@ import com.ref.application.config.Bot;
 import com.ref.application.domain.enumeration.ECommandData;
 import com.ref.application.service.manager.InfoManager;
 import com.ref.application.service.manager.InviteManager;
+import com.ref.application.service.manager.QrManager;
 import com.ref.application.service.manager.StartManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ public class CommandHandler {
     private final InfoManager infoManager;
     @Autowired
     private InviteManager inviteManager;
+    @Autowired
+    private QrManager qrManager;
 
     // обработка команды
     public BotApiMethod<?> answer(Message message, Bot bot) {
@@ -47,6 +50,9 @@ public class CommandHandler {
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
+            }
+            case TAKE_QR -> {
+                return takeQr(message, bot);
             }
             default -> {
                 return defaultAnswer(message);
@@ -78,4 +84,7 @@ public class CommandHandler {
         return inviteManager.answerCommand(message, bot);
     }
 
+    private BotApiMethod<?> takeQr(Message message, Bot bot) {
+        return qrManager.answerCommand(message, bot);
+    }
 }

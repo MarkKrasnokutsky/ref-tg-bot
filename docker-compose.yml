@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:4.0.7-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: rmuser
+      RABBITMQ_DEFAULT_PASS: rmpassword
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+
   ref-application-db:
     image: postgres:15
     container_name: ref-db
@@ -30,3 +43,5 @@ services:
       - '28072:5432'
     volumes:
       - ./.volumes/backend-db/pgdata:/var/lib/postgresql/data
+volumes:
+  rabbitmq_data:
