@@ -1,21 +1,25 @@
 package com.ref.application.service.manager;
 
+import com.ref.application.config.TelegramProps;
 import com.ref.application.domain.enumeration.ECallbackData;
 import com.ref.application.service.factory.AnswerMethodFactory;
 import com.ref.application.service.factory.KeyboardFactory;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class InfoManager {
+
+    private TelegramClient telegramClient;
+
+    private final TelegramProps telegramProps;
 
     @Autowired
     private final AnswerMethodFactory answerMethodFactory;
@@ -23,9 +27,16 @@ public class InfoManager {
     @Autowired
     private final KeyboardFactory keyboardFactory;
 
-    public SendMessage answerCommand(Message message) {
+    public InfoManager(TelegramProps telegramProps, AnswerMethodFactory answerMethodFactory, KeyboardFactory keyboardFactory) {
+        this.telegramProps = telegramProps;
+        this.telegramClient = new OkHttpTelegramClient(telegramProps.getToken());
+        this.keyboardFactory = keyboardFactory;
+        this.answerMethodFactory = answerMethodFactory;
+    }
+
+    public void answerCommand(Message message) throws TelegramApiException {
         // отдаем пользователю сообщение от бота
-        return answerMethodFactory.getSendMessage(
+        telegramClient.execute(answerMethodFactory.getSendMessage(
                 message.getChatId(),
                 """
                         What is Lorem Ipsum?
@@ -40,12 +51,12 @@ public class InfoManager {
                         List.of(1, 1),
                         List.of(ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
                 )
-        );
+        ));
     }
 
-    public EditMessageText answerCallbackQuery(CallbackQuery callbackQuery) {
+    public void answerCallbackQuery(CallbackQuery callbackQuery) throws TelegramApiException {
         // отдаем пользователю сообщение от бота
-        return answerMethodFactory.getEditMessageText(
+        telegramClient.execute(answerMethodFactory.getEditMessageText(
                 callbackQuery,
                 """
                         What is Lorem Ipsum?
@@ -59,7 +70,7 @@ public class InfoManager {
                         List.of("\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
                         List.of(1, 1),
                         List.of(ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
-                ));
+                )));
     }
 
 }

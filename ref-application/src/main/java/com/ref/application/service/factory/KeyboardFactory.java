@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -16,22 +17,27 @@ public class KeyboardFactory {
 
     // инициализация inline-клавиатуры
     public InlineKeyboardMarkup getInlineKeyboardMarkup(List<String> text, List<Integer> config, List<String> data) {
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
         int index = 0;
+
         for (Integer rowNum: config) {
-            List<InlineKeyboardButton> row = new ArrayList<>();
+            InlineKeyboardRow row = new InlineKeyboardRow();
             for (int i = 0; i < rowNum; i++) {
-                InlineKeyboardButton button = new InlineKeyboardButton();
-                button.setText(text.get(index));
-                button.setCallbackData(data.get(index));
-                row.add(button);
-                index += 1;
+                if (index < text.size() && index < data.size()) {
+                    InlineKeyboardButton button = InlineKeyboardButton.builder()
+                            .text(text.get(index))
+                            .callbackData(data.get(index))
+                            .build();
+                    row.add(button);
+                    index += 1;
+                }
             }
             keyboard.add(row);
         }
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        inlineKeyboardMarkup.setKeyboard(keyboard);
-        return inlineKeyboardMarkup;
+
+        return InlineKeyboardMarkup.builder()
+                .keyboard(keyboard)
+                .build();
     }
 
     public ReplyKeyboardMarkup getReplyKeyboardMarkup(List<String> text, List<Integer> config) {
@@ -40,16 +46,17 @@ public class KeyboardFactory {
         for (Integer rowNum: config) {
             KeyboardRow row = new KeyboardRow();
             for (int i = 0; i < rowNum; i++) {
-                KeyboardButton button = new KeyboardButton();
-                button.setText(text.get(index));
+                KeyboardButton button = KeyboardButton.builder()
+                        .text(text.get(index))
+                        .build();
                 row.add(button);
                 index += 1;
             }
             keyboard.add(row);
         }
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setKeyboard(keyboard);
-        return replyKeyboardMarkup;
+        return ReplyKeyboardMarkup.builder()
+                        .keyboard(keyboard)
+                                .build();
     }
 
     public InlineKeyboardMarkup createYesNoKeyboard() {

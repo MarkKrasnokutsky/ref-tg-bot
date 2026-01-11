@@ -9,6 +9,4 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class TelegramProps {
     private String token;
-    private String username;
-    private String path;
 }

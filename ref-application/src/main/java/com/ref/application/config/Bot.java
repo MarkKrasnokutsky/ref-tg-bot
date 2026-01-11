@@ -3,40 +3,31 @@ package com.ref.application.config;
 import com.ref.application.service.UpdateDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramWebhookBot;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
+import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
 
 @Component
 @Slf4j
-public class Bot extends TelegramWebhookBot {
+public class Bot implements SpringLongPollingBot {
 
     private final UpdateDispatcher updateDispatcher;
 
     private final TelegramProps telegramProps;
 
     public Bot(TelegramProps telegramProps, UpdateDispatcher updateDispatcher) {
-        super(telegramProps.getToken());
         this.telegramProps = telegramProps;
         this.updateDispatcher = updateDispatcher;
     }
 
-    // Реализация метода стандартного поведения бота на любой отправленный объект на сервер
+    // Получение токена бота
     @Override
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        return updateDispatcher.distribute(update, this);
+    public String getBotToken() {
+        return "8449709870:AAHPkUaLq_vH_dGte7UkeiQx_iEL4-pGtB4";
     }
 
-    // Получение url бота
     @Override
-    public String getBotPath() {
-        return telegramProps.getPath();
-    }
-
-    // Получение никнейма бота
-    @Override
-    public String getBotUsername() {
-        return telegramProps.getUsername();
+    public LongPollingUpdateConsumer getUpdatesConsumer() {
+        return updateDispatcher;
     }
 
 }
