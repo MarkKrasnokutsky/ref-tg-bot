@@ -27,6 +27,7 @@ public class Bot implements SpringLongPollingBot {
 
     @Override
     public LongPollingUpdateConsumer getUpdatesConsumer() {
+        log.warn("Providing UpdateDispatcher as consumer");
         return updateDispatcher;
     }
 

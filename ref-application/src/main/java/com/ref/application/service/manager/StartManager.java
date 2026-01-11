@@ -21,18 +21,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StartManager {
 
-    @Autowired
-    private final AnswerMethodFactory answerMethodFactory;
+    private AnswerMethodFactory answerMethodFactory;
+
+    private KeyboardFactory keyboardFactory;
+
+    private UserRepository userRepository;
+
+    private TelegramClient telegramClient;
+
+    private TelegramProps telegramProps;
 
     @Autowired
-    private final KeyboardFactory keyboardFactory;
-
-    private final UserRepository userRepository;
-
-    private final TelegramClient telegramClient;
-
-    private final TelegramProps telegramProps;
-
     public StartManager(AnswerMethodFactory answerMethodFactory, KeyboardFactory keyboardFactory, UserRepository userRepository,
                         TelegramProps telegramProps) {
         this.answerMethodFactory = answerMethodFactory;

@@ -28,30 +28,6 @@
             <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
             <version>9.2.1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.telegram</groupId>-->
-<!--            <artifactId>telegrambots</artifactId>-->
-<!--            <version>6.9.7.1</version>-->
-<!--&lt;!&ndash;            Исключаем три транзитивные зависимости у telegrambots&ndash;&gt;-->
-<!--&lt;!&ndash;            Причина: http клиент jersey является транзитивной зависимостью у discovery-сервера netflix-eureka, дискавери сервер&ndash;&gt;-->
-<!--&lt;!&ndash;            непосредственно зависит от данного клиента. У telegrambots и netflix-eureka версии http клиента jersey отличаются,&ndash;&gt;-->
-<!--&lt;!&ndash;            что приводит к коллизиям и несовместимости&ndash;&gt;-->
-<!--&lt;!&ndash;            Решением может быть либо исключение зависимостей у telegrambots, либо же принудительное использование другого http клиента&ndash;&gt;-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.core</groupId>-->
-<!--                    <artifactId>jersey-client</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.inject</groupId>-->
-<!--                    <artifactId>jersey-hk2</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.media</groupId>-->
-<!--                    <artifactId>jersey-media-json-jackson</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>com.mark</groupId>
