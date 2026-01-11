@@ -34,6 +34,7 @@
         <module>discovery-server</module>
         <module>ref-application</module>
         <module>backend_application</module>
+		<module>ref-rabbitmq</module>
     </modules>
     <scm>
 		<connection/>
