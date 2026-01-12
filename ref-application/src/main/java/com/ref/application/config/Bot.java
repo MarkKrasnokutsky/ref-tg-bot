@@ -22,7 +22,7 @@ public class Bot implements SpringLongPollingBot {
     // Получение токена бота
     @Override
     public String getBotToken() {
-        return "8449709870:AAHPkUaLq_vH_dGte7UkeiQx_iEL4-pGtB4";
+        return telegramProps.getToken();
     }
 
     @Override

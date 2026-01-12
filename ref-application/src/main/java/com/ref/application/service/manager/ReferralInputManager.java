@@ -62,6 +62,7 @@ public class ReferralInputManager {
         // Проверяем, что пользователь действительно в этом состоянии
         if (!userStateService.hasState(userId, EUserState.AWAITING_REFERRAL_RESPONSE)) {
             handleUnexpectedState(message);
+            return;
         }
 
         // Устанавливаем новое состояние в БД
@@ -98,6 +99,7 @@ public class ReferralInputManager {
         // Проверяем, что пользователь действительно в этом состоянии
         if (!userStateService.hasState(userId, EUserState.AWAITING_REFERRAL_CODE)) {
             handleUnexpectedState(message);
+            return;
         }
 
         // Очищаем состояние пользователя
@@ -105,18 +107,7 @@ public class ReferralInputManager {
 
         // Ищем пользователя по реферальному коду
         Optional<UserEntity> referrerOpt = userRepository.findByIndvRefCode(referralCode);
-        UserEntity referrer = referrerOpt.get();
         UserEntity currentUser = userRepository.findByUserId(userId);
-
-        // Проверяем, не использовал ли уже пользователь реферальный код
-        if (currentUser.getParent() != null) {
-            SendMessage alreadyUsedMessage = answerMethodFactory.getSendMessage(
-                    message.getChatId(),
-                    "❌ Вы уже использовали реферальный код ранее.",
-                    null
-            );
-            telegramClient.execute(alreadyUsedMessage);
-        }
 
         if (referrerOpt.isEmpty()) {
             SendMessage errorMessage = answerMethodFactory.getSendMessage(
@@ -128,8 +119,21 @@ public class ReferralInputManager {
 
             // Снова предлагаем ввести код
             askForReferralCodeAgain(message);
+            return;
         }
 
+        // Проверяем, не использовал ли уже пользователь реферальный код
+        if (currentUser.getParent() != null) {
+            SendMessage alreadyUsedMessage = answerMethodFactory.getSendMessage(
+                    message.getChatId(),
+                    "❌ Вы уже использовали реферальный код ранее.",
+                    null
+            );
+            telegramClient.execute(alreadyUsedMessage);
+            return;
+        }
+
+        UserEntity referrer = referrerOpt.get();
         // Проверяем, не пытается ли пользователь использовать свой собственный код
         if (referrer.getUserId().equals(userId)) {
             SendMessage selfReferralMessage = answerMethodFactory.getSendMessage(
@@ -138,6 +142,10 @@ public class ReferralInputManager {
                     null
             );
             telegramClient.execute(selfReferralMessage);
+
+            // Снова предлагаем ввести код
+            askForReferralCodeAgain(message);
+            return;
         }
 
         // Сохраняем реферера для пользователя
