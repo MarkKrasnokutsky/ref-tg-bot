@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: backend-application
   profiles:
     include: rabbitmq
   datasource:
@@ -12,10 +10,25 @@ spring:
     changeLog: classpath:/db/db.changelog-master.xml
     databaseChangeLogTable: _databasechangelog
     databaseChangeLogLockTable: _databasechangeloglock
+  application:
+    name: backend-application
+
+rabbitmq:
+  exchanges:
+    user-qr-gen-event:
+      name: user-qr-gen-event
+
+  queues:
+    user-qr-gen-queue:
+      name: user-qr-gen-queue
+  application:
+    name: backend-application
+  profiles:
+    include: rabbitmq
 server:
   port: 8070
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:1000/eureka/
+      defaultZone: http://localhost:8761/eureka/

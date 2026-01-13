@@ -19,7 +19,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="qr_image" type="BLOB">
+            <column name="qr_image" type="BYTEA">
                 <constraints nullable="false"/>
             </column>
 

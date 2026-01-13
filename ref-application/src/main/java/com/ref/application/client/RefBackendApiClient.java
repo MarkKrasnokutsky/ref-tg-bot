@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 @FeignClient(
-        name = "ref-backend-application"
+        name = "backend-application"
 )
 public interface RefBackendApiClient {
 
     @GetMapping("/api/v1/qr/{ownerId}/image")
     ResponseEntity<byte[]> getQRCodeImage(@PathVariable Long ownerId);
 
-    @GetMapping("/api/v1/qr/{ownerId}")
+    @GetMapping("/api/v1/qr/info/owner/{ownerId}")
     ResponseEntity<QrCodeResponse> getQRCodeInfoByOwnerId(@PathVariable Long ownerId);
 }

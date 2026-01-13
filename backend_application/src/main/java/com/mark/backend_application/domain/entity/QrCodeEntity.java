@@ -26,8 +26,7 @@ public class QrCodeEntity {
     @Column(name = "data_json", columnDefinition = "TEXT")
     private String dataJson;
 
-    @Lob
-    @Column(name = "qr_image")
+    @Column(name = "qr_image", columnDefinition = "BYTEA")
     private byte[] qrImage;
 
     @Column(name = "file_name")

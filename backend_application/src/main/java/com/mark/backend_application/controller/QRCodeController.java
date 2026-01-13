@@ -106,7 +106,7 @@ public class QRCodeController {
     /**
      * Получение информации о QR-коде по пользователю
      */
-    @GetMapping("/{ownerId}")
+    @GetMapping("/info/owner/{ownerId}")
     public ResponseEntity<QrCodeResponse> getQRCodeInfoByOwnerId(@PathVariable Long ownerId) {
         try {
             QrCodeResponse response = qrCodeService.getQRCodeInfoByOwnerId(ownerId);
@@ -119,7 +119,7 @@ public class QRCodeController {
     /**
      * Получение информации о QR-коде
      */
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public ResponseEntity<QrCodeResponse> getQRCodeInfo(@PathVariable Long id) {
         try {
             QrCodeResponse response = qrCodeService.getQRCodeInfo(id);

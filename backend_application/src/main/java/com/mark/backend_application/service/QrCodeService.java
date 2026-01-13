@@ -23,10 +23,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +59,20 @@ public class QrCodeService {
 
             // Сохраняем в базу
             String fileName = "qr_" + request.getUserId() + "_" + Instant.now() + ".png";
+
+            Optional<QrCodeEntity> qrCodeEntity = qrCodeRepository.findByOwnerId(request.getUserId());
+
+            if (qrCodeEntity.isPresent()) {
+                QrCodeEntity qrCode =  qrCodeEntity.get();
+                return QrCodeResponse.builder()
+                        .id(qrCode.getId())
+                        .fileName(qrCode.getFileName())
+                        .createdAt(qrCode.getCreatedAt())
+                        .redirectUrl(qrCode.getRedirectUrl())
+                        .ownerId(qrCode.getOwnerId())
+                        .qrContent(objectMapper.readValue(qrCode.getDataJson(), Map.class))
+                        .build();
+            }
 
             QrCodeEntity qrCode = QrCodeEntity.builder()
                     .dataJson(jsonContent)
