@@ -3,6 +3,7 @@ package com.ref.application.service.manager;
 import com.ref.application.config.Bot;
 import com.ref.application.config.TelegramProps;
 import com.ref.application.domain.entity.UserEntity;
+import com.ref.application.domain.enumeration.ECallbackData;
 import com.ref.application.domain.enumeration.EUserState;
 import com.ref.application.repository.UserRepository;
 import com.ref.application.service.BonusService;
@@ -13,9 +14,11 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -68,10 +71,18 @@ public class ReferralInputManager {
         // Устанавливаем новое состояние в БД
         userStateService.setUserState(userId, EUserState.AWAITING_REFERRAL_CODE);
 
+        ReplyKeyboardMarkup cancelKeyboard = keyboardFactory.getReplyKeyboardMarkup(
+                List.of("❌ Отменить"),
+                List.of(1),
+                true,   // resizeKeyboard
+                true,  // oneTimeKeyboard
+                true    // selective
+        );
+
         SendMessage sendMessage = answerMethodFactory.getSendMessage(
                 message.getChatId(),
                 "Введите реферальный код",
-                null
+                cancelKeyboard
         );
 
         telegramClient.execute(sendMessage);
@@ -166,6 +177,21 @@ public class ReferralInputManager {
 
         // Уведомляем реферера о приглашении
         notifyReferrer(referrer, currentUser);
+    }
+
+    public void cancelReferralCode(Message message) throws TelegramApiException {
+        userStateService.clearUserState(message.getChatId());
+        // Отправляем сообщение об успехе
+        SendMessage cancelMessage = answerMethodFactory.getSendMessage(
+                message.getChatId(),
+                "❌ Отмена операции по вводу реферального кода",
+                keyboardFactory.getInlineKeyboardMarkup(
+                        List.of("\uD83E\uDD1D\uD83C\uDFFBПригласить друга", "Получить бонус"),
+                        List.of(1, 1),
+                        List.of(ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
+                )
+        );
+        telegramClient.execute(cancelMessage);
     }
 
     private void askForReferralCodeAgain(Message message) throws TelegramApiException {

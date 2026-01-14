@@ -40,9 +40,15 @@ public class KeyboardFactory {
                 .build();
     }
 
-    public ReplyKeyboardMarkup getReplyKeyboardMarkup(List<String> text, List<Integer> config) {
+    // В KeyboardFactory можно добавить перегруженный метод с настройками
+    public ReplyKeyboardMarkup getReplyKeyboardMarkup(List<String> text,
+                                                      List<Integer> config,
+                                                      boolean resizeKeyboard,
+                                                      boolean oneTimeKeyboard,
+                                                      boolean selective) {
         List<KeyboardRow> keyboard = new ArrayList<>();
         int index = 0;
+
         for (Integer rowNum: config) {
             KeyboardRow row = new KeyboardRow();
             for (int i = 0; i < rowNum; i++) {
@@ -54,9 +60,13 @@ public class KeyboardFactory {
             }
             keyboard.add(row);
         }
+
         return ReplyKeyboardMarkup.builder()
-                        .keyboard(keyboard)
-                                .build();
+                .keyboard(keyboard)
+                .resizeKeyboard(resizeKeyboard)
+                .oneTimeKeyboard(oneTimeKeyboard)
+                .selective(selective)
+                .build();
     }
 
     public InlineKeyboardMarkup createYesNoKeyboard() {
