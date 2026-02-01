@@ -1,0 +1,16 @@
+spring:
+  rabbitmq:
+    connection-timeout: 10000
+    host: localhost
+    port: 5672
+    username: rmuser
+    password: rmpassword
+
+rabbitmq:
+  exchanges:
+    user-qr-gen-event:
+      name: user-qr-gen-event
+
+  queues:
+    user-qr-gen-queue:
+      name: user-qr-gen-queue

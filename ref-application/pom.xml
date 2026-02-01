@@ -7,7 +7,6 @@
         <groupId>com.mark</groupId>
         <artifactId>ref-tg-bot</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>ref-application</artifactId>
@@ -19,35 +18,23 @@
     </properties>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>com.squareup.okhttp3</groupId>-->
-<!--            <artifactId>okhttp</artifactId>-->
-<!--            <version>4.12.0</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.telegram</groupId>
-            <artifactId>telegrambots</artifactId>
-            <version>6.9.7.1</version>
-<!--            Исключаем три транзитивные зависимости у telegrambots-->
-<!--            Причина: http клиент jersey является транзитивной зависимостью у discovery-сервера netflix-eureka, дискавери сервер-->
-<!--            непосредственно зависит от данного клиента. У telegrambots и netflix-eureka версии http клиента jersey отличаются,-->
-<!--            что приводит к коллизиям и несовместимости-->
-<!--            Решением может быть либо исключение зависимостей у telegrambots, либо же принудительное использование другого http клиента-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.core</groupId>-->
-<!--                    <artifactId>jersey-client</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.inject</groupId>-->
-<!--                    <artifactId>jersey-hk2</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.glassfish.jersey.media</groupId>-->
-<!--                    <artifactId>jersey-media-json-jackson</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+            <artifactId>telegrambots-client</artifactId>
+            <version>9.2.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-springboot-longpolling-starter</artifactId>
+            <version>9.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mark</groupId>
+            <artifactId>ref-rabbitmq</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -70,6 +57,20 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mark</groupId>
+            <artifactId>backend_application</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

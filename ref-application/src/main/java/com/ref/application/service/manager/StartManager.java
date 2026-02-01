@@ -1,5 +1,6 @@
 package com.ref.application.service.manager;
 
+import com.ref.application.config.TelegramProps;
 import com.ref.application.domain.entity.UserEntity;
 import com.ref.application.domain.enumeration.ECallbackData;
 import com.ref.application.repository.UserRepository;
@@ -8,8 +9,10 @@ import com.ref.application.service.factory.KeyboardFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,15 +21,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StartManager {
 
-    @Autowired
-    private final AnswerMethodFactory answerMethodFactory;
+    private AnswerMethodFactory answerMethodFactory;
+
+    private KeyboardFactory keyboardFactory;
+
+    private UserRepository userRepository;
+
+    private TelegramClient telegramClient;
+
+    private TelegramProps telegramProps;
 
     @Autowired
-    private final KeyboardFactory keyboardFactory;
+    public StartManager(AnswerMethodFactory answerMethodFactory, KeyboardFactory keyboardFactory, UserRepository userRepository,
+                        TelegramProps telegramProps) {
+        this.answerMethodFactory = answerMethodFactory;
+        this.keyboardFactory = keyboardFactory;
+        this.userRepository = userRepository;
+        this.telegramProps = telegramProps;
+        this.telegramClient = new OkHttpTelegramClient(telegramProps.getToken());
+    }
 
-    private final UserRepository userRepository;
-
-    public SendMessage answerCommand(Message message) {
+    public void answerCommand(Message message) throws TelegramApiException {
         if (!userRepository.existsByChatId(message.getChatId())) {
             // сохраняем пользователя в нашу БД
             UserEntity currentUser = UserEntity.builder()
@@ -42,7 +57,7 @@ public class StartManager {
         }
 
         // отдаем пользователю сообщение от бота
-        return answerMethodFactory.getSendMessage(
+        telegramClient.execute(answerMethodFactory.getSendMessage(
                 message.getChatId(),
                 """
                         🖖Приветствую, это бот реферальной системы Trinity
@@ -52,7 +67,7 @@ public class StartManager {
                         List.of(2, 1),
                         List.of(ECallbackData.INFO.toString(), ECallbackData.INVITE.toString(), ECallbackData.TAKE_BONUS.toString())
                 )
-        );
+        ));
     }
 
 }

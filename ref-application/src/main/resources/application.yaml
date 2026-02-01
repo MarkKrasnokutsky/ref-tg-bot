@@ -1,13 +1,15 @@
 spring:
   application:
     name: ref-application
+  profiles:
+    include: rabbitmq
   datasource:
     driver-class-name: org.postgresql.Driver
     username: admin
     password: admin
     url: jdbc:postgresql://localhost:28071/ref_db
   liquibase:
-    changeLog: classpath:/db/db.changelog-master.xml
+    changeLog: classpath:/db/ref/application/db.changelog-master.xml
     databaseChangeLogTable: _databasechangelog
     databaseChangeLogLockTable: _databasechangeloglock
 server:
@@ -17,11 +19,9 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:1000/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 
 # Параметры подключения бота
 telegram-bot:
-  username: "@ref_test_java_bot"
-  token: "8067451738:AAHGcEZ-eOzrEjcBRYHIlnzPHkBDIV0Pjz4"
-  path: "https://sagaciously-diverse-duckbill.cloudpub.ru/"
+  token: "8449709870:AAHPkUaLq_vH_dGte7UkeiQx_iEL4-pGtB4"
