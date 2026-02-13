@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+// сканируем явно пакеты с конфигами при запуске приложения
 @SpringBootApplication(
         scanBasePackages = {
                 "com.mark.backend_application",
