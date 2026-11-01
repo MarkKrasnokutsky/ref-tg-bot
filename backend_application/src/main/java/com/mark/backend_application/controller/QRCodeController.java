@@ -1,6 +1,5 @@
 package com.mark.backend_application.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mark.backend_application.domain.QRContent;
 import com.mark.backend_application.domain.entity.QrCodeEntity;
 import com.mark.backend_application.domain.request.QrCodeRequest;
@@ -15,10 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
