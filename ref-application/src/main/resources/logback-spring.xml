@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Читаем параметры из application.yml -->
+    <springProperty name="APP_NAME" source="spring.application.name" defaultValue="unknown"/>
+    <springProperty name="LOGSTASH_HOST" source="logstash.host" defaultValue="localhost:5000"/>
+    <springProperty name="ENVIRONMENT" source="app.environment" defaultValue="dev"/>
+
+    <!-- Аппендер для Logstash (JSON) -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_HOST}</destination>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                    <fieldName>@timestamp</fieldName>
+                </timestamp>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                </stackTrace>
+                <mdc>
+                    <fieldName>mdc</fieldName>
+                </mdc>
+                <!-- Добавляем свои поля -->
+                <provider class="net.logstash.logback.composite.GlobalCustomFieldsJsonProvider">
+                    <customFields>{
+                        "service":"${APP_NAME}",
+                        "environment":"${ENVIRONMENT}"
+                        }</customFields>
+                </provider>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Консольный аппендер (текст) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Профиль dev: пишем и в консоль, и в логстеш -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
+
+    <!-- Профиль prod: только в логстеш -->
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
+
+    <!-- По умолчанию -->
+    <springProfile name="!dev &amp; !prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
+</configuration>

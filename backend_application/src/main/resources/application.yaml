@@ -32,3 +32,31 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+logstash:
+  host: ${LOGSTASH_URL:localhost:5000}  # Можно переопределить через переменную окружения
+
+# Окружение
+app:
+  environment: ${ENVIRONMENT:dev}
+
+# Логирование
+logging:
+  level:
+    root: INFO
+    com.mark.backend_application: DEBUG
+
+# Для Sleuth (traceId)
+spring.sleuth:
+  sampler:
+    probability: 1.0  # В dev - 100%, в prod - 0.1 (10%)
+  web:
+    skip-pattern: /actuator/health|/actuator/info
+
+# Для Micrometer Tracing (Spring Boot 3)
+management:
+  tracing:
+    sampling:
+      probability: 1.0

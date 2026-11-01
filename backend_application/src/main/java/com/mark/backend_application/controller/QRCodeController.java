@@ -11,6 +11,7 @@ import com.mark.backend_application.domain.response.ScanResponse;
 import com.mark.backend_application.service.QrCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -135,6 +136,8 @@ public class QRCodeController {
     @GetMapping
     public ResponseEntity<List<QrCodeEntity>> getAllQRCodes() {
         List<QrCodeEntity> responses = qrCodeService.getAllQRCodes();
+        log.info("Тестовое сообщение с traceId: {}",
+                MDC.get("traceId"));  // Sleuth автоматически добавит traceId в MDC
         return ResponseEntity.ok(responses);
     }
 
